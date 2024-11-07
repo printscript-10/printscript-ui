@@ -2,6 +2,7 @@ import {AppBar, Box, Button, Container, Toolbar, Typography} from "@mui/material
 import {Code, Rule} from "@mui/icons-material";
 import {ReactNode} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
 type PageType = {
     title: string;
@@ -22,6 +23,12 @@ const pages: PageType[] = [{
 export const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { logout } = useAuth0();
+
+    const handleLogout = () => {
+        logout();
+    };
+
     return (
         <AppBar position="static" elevation={0}>
             <Container maxWidth="xl">
@@ -61,6 +68,19 @@ export const Navbar = () => {
                             </Button>
                         ))}
                     </Box>
+                    <Button
+                        onClick={handleLogout}
+                        sx={{
+                            color: 'white',
+                            ml: 'auto', // Pushes the button to the far right
+                            backgroundColor: 'secondary.main',
+                            "&:hover": {
+                                backgroundColor: 'secondary.dark'
+                            }
+                        }}
+                    >
+                        Logout
+                    </Button>
                 </Toolbar>
             </Container>
         </AppBar>
