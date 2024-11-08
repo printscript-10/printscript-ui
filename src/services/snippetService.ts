@@ -13,8 +13,7 @@ export class SnippetService implements SnippetOperations {
     }
 
     async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
-        const snippetId = 2;
-        return await api.post(`snippets/${snippetId}`, {
+        return await api.post(`snippets`, {
             name: createSnippet.name,
             language: createSnippet.language,
             snippet: createSnippet.content,
@@ -58,8 +57,9 @@ export class SnippetService implements SnippetOperations {
         throw new Error("Method not implemented.");
     }
 
-    async postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
-        return (await api.post(`tests/${testCase.id}`, {
+    async postTestCase(testCase: Partial<TestCase>, snippetId: string): Promise<TestCase> {
+        console.log(testCase)
+        return (await api.post(`tests/${snippetId}`, {
             name: testCase.name,
             inputs: testCase.input,
             outputs: testCase.output,
@@ -74,8 +74,13 @@ export class SnippetService implements SnippetOperations {
         return (await api.delete(`snippets/${id}}`))
     }
 
-    async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
-        return (await api.put(`tests/${testCase.id}`)).data.success? "success" : "fail";
+    async testSnippet(testCase: Partial<TestCase>, snippetId: string): Promise<TestCaseResult> {
+        console.log(testCase)
+        return (await api.put(`tests`, {
+            snippetId: snippetId,
+            input: testCase.input,
+            output: testCase.output,
+        })).data.success? "success" : "fail";
     }
 
     async getFileTypes(): Promise<FileType[]> {
