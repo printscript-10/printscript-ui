@@ -13,7 +13,8 @@ export class SnippetService implements SnippetOperations {
     }
 
     async createSnippet(createSnippet: CreateSnippet): Promise<Snippet> {
-        return await api.post('snippets', {
+        const snippetId = 2;
+        return await api.post(`snippets/${snippetId}`, {
             name: createSnippet.name,
             language: createSnippet.language,
             snippet: createSnippet.content,
@@ -24,16 +25,21 @@ export class SnippetService implements SnippetOperations {
         return (await api.get(`snippets/${id}`)).data;
     }
 
-    updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
-        throw new Error("Method not implemented.");
+    async updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
+        return await api.put(`snippets/${id}`, {
+            snippet: updateSnippet.content,
+        })
     }
 
     getUserFriends(name?: string | undefined, page?: number | undefined, pageSize?: number | undefined): Promise<PaginatedUsers> {
         throw new Error("Method not implemented.");
     }
 
-    shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
-        throw new Error("Method not implemented.");
+    async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
+        return await api.post(`snippets/share`, {
+            snippetId: snippetId,
+            userId: userId,
+        })
     }
 
     getFormatRules(): Promise<Rule[]> {
@@ -44,8 +50,8 @@ export class SnippetService implements SnippetOperations {
         throw new Error("Method not implemented.");
     }
 
-    getTestCases(): Promise<TestCase[]> {
-        throw new Error("Method not implemented.");
+    async getTestCases(snippetId: string): Promise<TestCase[]> {
+        return (await api.get(`tests/${snippetId}`)).data;
     }
 
     formatSnippet(snippet: string): Promise<string> {
@@ -60,16 +66,16 @@ export class SnippetService implements SnippetOperations {
         })).data;
     }
 
-    removeTestCase(id: string): Promise<string> {
-        throw new Error("Method not implemented.");
+    async removeTestCase(id: string): Promise<string> {
+        return (await api.delete(`tests/${id}`))
     }
 
-    deleteSnippet(id: string): Promise<string> {
-        throw new Error("Method not implemented.");
+    async deleteSnippet(id: string): Promise<string> {
+        return (await api.delete(`snippets/${id}}`))
     }
 
-    testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
-        throw new Error("Method not implemented.");
+    async testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
+        return (await api.put(`tests/${testCase.id}`)).data.success? "success" : "fail";
     }
 
     async getFileTypes(): Promise<FileType[]> {
