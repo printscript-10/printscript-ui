@@ -71,13 +71,13 @@ const FormattingRulesList = () => {
                 onChange={toggleRule(rule)}
               />
               <ListItemText primary={rule.name} />
-              {typeof rule.value === 'number' ?
+              {rule.valueType === 'INTEGER' ?
                 (<TextField
                   type="number"
                   variant={"standard"}
                   value={rule.value}
                   onChange={handleNumberChange(rule)}
-                />) : typeof rule.value === 'string' ?
+                />) : rule.valueType === 'STRING' ?
                   (<TextField
                     variant={"standard"}
                     value={rule.value}

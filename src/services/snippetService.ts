@@ -41,12 +41,16 @@ export class SnippetService implements SnippetOperations {
         })
     }
 
-    getFormatRules(): Promise<Rule[]> {
-        throw new Error("Method not implemented.");
+    async getFormatRules(): Promise<Rule[]> {
+        return (await api.get('rules/FORMAT')).data.map((rule: any) => {
+            return {...rule, isActive: rule.active}
+        })
     }
 
-    getLintingRules(): Promise<Rule[]> {
-        throw new Error("Method not implemented.");
+    async getLintingRules(): Promise<Rule[]> {
+        return (await api.get('rules/LINT')).data.map((rule: any) => {
+            return {...rule, isActive: rule.active}
+        })
     }
 
     async getTestCases(snippetId: string): Promise<TestCase[]> {
@@ -75,7 +79,6 @@ export class SnippetService implements SnippetOperations {
     }
 
     async testSnippet(testCase: Partial<TestCase>, snippetId: string): Promise<TestCaseResult> {
-        console.log(testCase)
         return (await api.put(`tests`, {
             snippetId: snippetId,
             input: testCase.input,
@@ -87,12 +90,24 @@ export class SnippetService implements SnippetOperations {
         return (await api.get('snippets/languages')).data;
     }
 
-    modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
-        throw new Error("Method not implemented.");
+    async modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
+        return (await api.post('rules/FORMAT', newRules.filter((rule) => rule.value != null).map((rule) => {
+            return {
+                ruleId: rule.id,
+                isActive: rule.isActive ,
+                value: rule.value?.toString(),
+            }
+        })));
     }
 
-    modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
-        throw new Error("Method not implemented.");
+    async modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
+        return (await api.post('rules/LINT', newRules.filter((rule) => rule.value != null).map((rule) => {
+            return {
+                ruleId: rule.id,
+                isActive: rule.isActive ,
+                value: rule.value?.toString(),
+            }
+        })));
     }
 
 }
