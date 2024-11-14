@@ -66,8 +66,13 @@ export class SnippetService implements SnippetOperations {
         return (await api.get(`tests/${snippetId}`)).data;
     }
 
-    formatSnippet(snippet: string): Promise<string> {
-        throw new Error("Method not implemented.");
+    async formatSnippet(snippet: string): Promise<string> {
+
+        let res = (await api.post(`rules/format`, {
+            snippet: snippet,
+        })).data;
+        console.log(res.errors)
+        return res.formattedSnippet
     }
 
     async postTestCase(testCase: Partial<TestCase>, snippetId: string): Promise<TestCase> {
