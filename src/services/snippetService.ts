@@ -4,7 +4,7 @@ import { TestCase } from "../types/TestCase";
 import { TestCaseResult } from "../utils/queries";
 import { PaginatedSnippets, CreateSnippet, Snippet, UpdateSnippet } from "../utils/snippet";
 import { SnippetOperations } from "../utils/snippetOperations";
-import { PaginatedUsers } from "../utils/users";
+import { PaginatedUsers, User } from "../utils/users";
 import api from "./api";
 
 export class SnippetService implements SnippetOperations {
@@ -30,8 +30,21 @@ export class SnippetService implements SnippetOperations {
         })
     }
 
-    getUserFriends(name?: string | undefined, page?: number | undefined, pageSize?: number | undefined): Promise<PaginatedUsers> {
-        throw new Error("Method not implemented.");
+    async getUserFriends(name?: string | undefined, page?: number | undefined, pageSize?: number | undefined): Promise<PaginatedUsers> {
+        const response =  (await api.get(`snippets/friends?page=${page}&pageSize=${pageSize}&param=${name}`)).data;
+
+        const users: User[] = response.users.map((user: any) => {
+            return {
+                id: user.user_id,
+                name: user.nickname,
+            }
+        })
+        return {
+            users: users,
+            page: page || 0,
+            page_size: pageSize || 10,
+            count: response.total,
+        }
     }
 
     async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
@@ -42,15 +55,11 @@ export class SnippetService implements SnippetOperations {
     }
 
     async getFormatRules(): Promise<Rule[]> {
-        return (await api.get('rules/FORMAT')).data.map((rule: any) => {
-            return {...rule, isActive: rule.active}
-        })
+        return (await api.get('rules/FORMAT')).data
     }
 
     async getLintingRules(): Promise<Rule[]> {
-        return (await api.get('rules/LINT')).data.map((rule: any) => {
-            return {...rule, isActive: rule.active}
-        })
+        return (await api.get('rules/LINT')).data
     }
 
     async getTestCases(snippetId: string): Promise<TestCase[]> {
@@ -62,7 +71,6 @@ export class SnippetService implements SnippetOperations {
     }
 
     async postTestCase(testCase: Partial<TestCase>, snippetId: string): Promise<TestCase> {
-        console.log(testCase)
         return (await api.post(`tests/${snippetId}`, {
             name: testCase.name,
             inputs: testCase.input,
@@ -75,7 +83,7 @@ export class SnippetService implements SnippetOperations {
     }
 
     async deleteSnippet(id: string): Promise<string> {
-        return (await api.delete(`snippets/${id}}`))
+        return (await api.delete(`snippets/${id}`))
     }
 
     async testSnippet(testCase: Partial<TestCase>, snippetId: string): Promise<TestCaseResult> {
@@ -91,21 +99,21 @@ export class SnippetService implements SnippetOperations {
     }
 
     async modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
-        return (await api.post('rules/FORMAT', newRules.filter((rule) => rule.value != null).map((rule) => {
+        return (await api.post('rules/FORMAT', newRules.filter((rule) => rule.value != null || rule.isActive != null).map((rule) => {
             return {
                 ruleId: rule.id,
                 isActive: rule.isActive ,
-                value: rule.value?.toString(),
+                value: rule.value?.toString() || rule.isActive?.toString(),
             }
         })));
     }
 
     async modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
-        return (await api.post('rules/LINT', newRules.filter((rule) => rule.value != null).map((rule) => {
+        return (await api.post('rules/LINT', newRules.filter((rule) => rule.value != null || rule.isActive != null).map((rule) => {
             return {
                 ruleId: rule.id,
                 isActive: rule.isActive ,
-                value: rule.value?.toString(),
+                value: rule.value?.toString() || rule.isActive?.toString(),
             }
         })));
     }

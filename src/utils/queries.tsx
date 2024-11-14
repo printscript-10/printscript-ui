@@ -62,7 +62,7 @@ export const useUpdateSnippetById = ({onSuccess}: {onSuccess: () => void}): UseM
 export const useGetUsers = (name: string = "", page: number = 0, pageSize: number = 10) => {
   const snippetOperations = useSnippetsOperations()
 
-  return useQuery<PaginatedUsers, Error>(['users',name,page,pageSize], () => snippetOperations.getUserFriends(name,page, pageSize));
+  return useQuery<PaginatedUsers, Error>(['users',name,page,pageSize], () => snippetOperations.getUserFriends(name,page-1, pageSize));
 };
 
 export const useShareSnippet = () => {
@@ -74,7 +74,7 @@ export const useShareSnippet = () => {
 };
 
 
-export const useGetTestCases = (snippetId: String) => {
+export const useGetTestCases = (snippetId: string) => {
   const snippetOperations = useSnippetsOperations()
 
   return useQuery<TestCase[] | undefined, Error>(['testCases'], () => snippetOperations.getTestCases(snippetId), {});
