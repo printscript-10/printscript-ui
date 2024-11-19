@@ -67,7 +67,6 @@ export class SnippetService implements SnippetOperations {
     }
 
     async formatSnippet(snippet: string): Promise<string> {
-
         let res = (await api.post(`rules/format`, {
             snippet: snippet,
         })).data;

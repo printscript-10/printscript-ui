@@ -35,13 +35,14 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
         onSuccess: () => queryClient.invalidateQueries('listSnippets')
     })
     const {data: fileTypes} = useGetFileTypes();
+    const safeFileTypes = Array.isArray(fileTypes) ? fileTypes : [];
 
     const handleCreateSnippet = async () => {
         const newSnippet: CreateSnippet = {
             name: snippetName,
             content: code,
             language: language,
-            extension: fileTypes?.find((f) => f.language === language)?.extension ?? "prs"
+            extension: fileTypes?.find((f) => f.language === language)?.extension ?? "ps"
         }
         await createSnippet(newSnippet);
         onClose();
@@ -97,7 +98,7 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
                     sx={{width: '50%'}}
                 >
                     {
-                        fileTypes?.map(x => (
+                        safeFileTypes.map(x => (
                             <MenuItem data-testid={`menu-option-${x.language}`} key={x.language}
                                       value={x.language}>{(x.language)}</MenuItem>
                         ))
