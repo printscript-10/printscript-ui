@@ -1,0 +1,63 @@
+name: Docker Build and Deploy - MAIN
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}
+          build-args: |
+            VITE_FRONTEND_URL=http://printscript-ui:80
+            VITE_BACKEND_URL=http://snippet-manager:8081
+            VITE_AUTH0_DOMAIN=${{ secrets.VITE_AUTH0_DOMAIN_DEV }}
+            VITE_AUTH0_AUDIENCE=${{ secrets.VITE_AUTH0_AUDIENCE_DEV }}
+            VITE_AUTH0_CLIENT_ID=${{ secrets.VITE_AUTH0_CLIENT_ID_DEV }}
+            VITE_AUTH0_USERNAME=${{ secrets.VITE_AUTH0_USERNAME_DEV }}
+            VITE_AUTH0_PASSWORD=${{ secrets.VITE_AUTH0_PASSWORD_DEV }}
+
+  pull-and-run-image:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          USERNAME: ${{ secrets.GHCR_USERNAME }}
+          TOKEN: ${{ secrets.TOKEN }}
+        with:
+          host: ${{ secrets.DEV_EC2_HOST_DNS }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: USERNAME, TOKEN
+          script: |
+            cd infra
+            sudo docker login --username $USERNAME --password $TOKEN ghcr.io
+            sudo docker-compose -f docker-compose.dev.yml stop printscript-ui
+            sudo docker system prune --force
+            sudo docker-compose -f docker-compose.dev.yml pull printscript-ui
+            sudo docker-compose -f docker-compose.dev.yml up -d printscript-ui
