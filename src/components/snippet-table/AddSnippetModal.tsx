@@ -1,7 +1,6 @@
 import {
     Box,
     Button,
-    capitalize,
     CircularProgress,
     Input,
     InputLabel,
@@ -36,16 +35,18 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
     })
     const {data: fileTypes} = useGetFileTypes();
     const safeFileTypes = Array.isArray(fileTypes) ? fileTypes : [];
-
+    const [errorMessage, setErrorMessage] = useState("")
     const handleCreateSnippet = async () => {
+        setErrorMessage("")
         const newSnippet: CreateSnippet = {
             name: snippetName,
             content: code,
             language: language,
             extension: fileTypes?.find((f) => f.language === language)?.extension ?? "ps"
         }
-        await createSnippet(newSnippet);
-        onClose();
+        await createSnippet(newSnippet)
+            .then(() => onClose())
+            .catch((er) => setErrorMessage(er.response.data.message))
     }
 
     useEffect(() => {
@@ -126,6 +127,9 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
                     }}
                 />
             </Box>
+            <Typography component="p" sx={{height:"24px", color: 'red'}}>
+                Error: {errorMessage}
+            </Typography>
         </ModalWrapper>
     )
 }

@@ -18,9 +18,15 @@ export const ShareSnippetModal = (props: ShareSnippetModalProps) => {
   const [selectedUser, setSelectedUser] = useState<User | undefined>()
 
   useEffect(() => {
+    if (!name.trim()) {
+      setDebouncedName("")
+      return
+    }
+
     const getData = setTimeout(() => {
       setDebouncedName(name)
-    }, 3000)
+    }, 300)
+
     return () => clearTimeout(getData)
   }, [name])
 

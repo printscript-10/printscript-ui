@@ -57,7 +57,7 @@ describe('Home', () => {
       // Make the API request with the token in the headers
       cy.request({
         method: 'POST',
-        url: `${backendUrl}/snippets`,
+        url: `${backendUrl}snippets`,
         body: snippetData,
         headers: {
           'Authorization': `Bearer ${token}`

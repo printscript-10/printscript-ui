@@ -1,0 +1,40 @@
+FROM node:20-slim AS build
+
+WORKDIR /app
+
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+
+RUN npm ci
+
+COPY . /app
+
+ARG VITE_FRONTEND_URL
+ARG VITE_BACKEND_URL
+ARG VITE_AUTH0_DOMAIN
+ARG VITE_AUTH0_AUDIENCE
+ARG VITE_AUTH0_CLIENT_ID
+ARG VITE_AUTH0_PASSWORD
+ARG VITE_AUTH0_USERNAME
+
+ENV VITE_FRONTEND_URL=${VITE_FRONTEND_URL}
+ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
+ENV VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
+ENV VITE_AUTH0_AUDIENCE=${VITE_AUTH0_AUDIENCE}
+ENV VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
+ENV VITE_AUTH0_PASSWORD=${VITE_AUTH0_PASSWORD}
+ENV VITE_AUTH0_USERNAME=${VITE_AUTH0_USERNAME}
+
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=build /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+WORKDIR /usr/share/nginx/html
+
+RUN rm -rf ./*
+
+COPY --from=build /app/dist .
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
