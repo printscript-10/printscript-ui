@@ -26,7 +26,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}
+          tags: ghcr.io/${{ github.repository }}-dev
           build-args: |
             VITE_FRONTEND_URL=http://printscript-ui:80
             VITE_BACKEND_URL=http://snippet-manager:8081
